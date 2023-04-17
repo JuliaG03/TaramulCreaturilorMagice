@@ -2,6 +2,8 @@
 #include<cstring>
 #include<iomanip>
 #include<vector>
+#include<cstdlib>
+#include <ctime>
 using namespace std;
 
 class IOinterface{
@@ -117,8 +119,8 @@ Creatura& Creatura::operator--()
 
 //--------------------------------------------------------------------------
 
-class Dragon: public Creatura{
-private:
+class Dragon: virtual public Creatura{
+protected:
     float marimeAripi;  //in cm ( min 0, max 500)
     bool ePericulos;  // 0 - prietenos, 1 - periculos
 
@@ -140,7 +142,8 @@ Dragon& operator=(const Dragon& obj){
     if( this!=&obj){
         Creatura::operator=(obj);
         this->marimeAripi = obj.marimeAripi;
-        this->ePericulos = obj.ePericulos;}}
+        this->ePericulos = obj.ePericulos;}
+    return *this;}
 
 virtual istream& citire(istream& in){
     Creatura::citire(in);
@@ -165,8 +168,8 @@ virtual float staredeBine() const{
 };
 
 
-class Zana:public Creatura{
-private:
+class Zana:virtual public Creatura{
+protected:
     string culoare;
     bool abilitateVindecare;
 public:
@@ -186,7 +189,8 @@ Zana& operator=(const Zana& obj){
     if (this!=&obj){
         Creatura::operator=(obj);
         this->abilitateVindecare = obj.abilitateVindecare;
-        this->culoare = obj.culoare;}}
+        this->culoare = obj.culoare;}
+        return *this;}
 
 
 virtual istream& citire(istream& in){
@@ -210,6 +214,68 @@ virtual float staredeBine() const{
     return procent; }
 
 };
+
+
+class Fantastic: public Dragon, public Zana{
+private:
+    string puteri[3] = { "foc", "apa", "gheata" };
+    string putereMagica;
+public:
+    //constructor fara parametrii
+    Fantastic():Dragon(),Zana(){
+        srand(time(NULL));
+        this->putereMagica = puteri[rand()%3];}
+    //copyconstructor
+    Fantastic(const Fantastic& obj):Dragon(obj),Zana(obj){
+        this->puteri[0] = obj.puteri[0];
+        this->puteri[1] = obj.puteri[1];
+        this->puteri[2] = obj.puteri[2];
+        this->putereMagica = obj.putereMagica;}
+    //op=
+    Fantastic& operator=(const Fantastic& obj){
+        if(this!=&obj){
+            Dragon::operator=(obj);
+            Zana::operator=(obj);
+            this->puteri[0] = obj.puteri[0];
+            this->puteri[1] = obj.puteri[1];
+            this->puteri[2] = obj.puteri[2];
+            this->putereMagica = obj.putereMagica;}
+        return *this;}
+    //citire afisare
+
+    istream& citire(istream& in){
+        Creatura::citire(in);
+        cout<<"\nCuloare: ";
+        in>>this->culoare;
+        cout<<"\nAbilitate vindecare : 1/0 :";
+        in>>this->abilitateVindecare;
+        cout<<"\nMarime Aripi =";
+        in>>this->marimeAripi;
+        cout<<"\nE periculos? 1/0 :";
+        in>>this->ePericulos;
+        in>>this->putereMagica;
+        return in; }
+
+    ostream& afisare( ostream& out)const{
+        Creatura::afisare(out);
+        out<<"\nCuloare : "<<this->culoare;
+        out<<"\nAbilitate Vindecare : "<<(this->abilitateVindecare ? "Da" : "Nu");
+        out<<"\nMarime aripi: "<<this->marimeAripi;
+        out<<"\nE periculos? "<<(this->ePericulos ? "Da" : "Nu");
+        out<<"\nPutere Magica : "<<this->putereMagica;
+        return out;}
+
+    virtual float staredeBine() const{
+        float procent = 0.0;
+        procent = fericire + sanatate + abs(100-hrana);
+        procent = procent/3;
+        return procent; }
+
+    virtual ~Fantastic() {}
+
+
+    };
+
 
 //----------------
 
@@ -371,10 +437,10 @@ void Exit(){
 int main(){
 
 
-Dragon d;
-Zana z;
-cout<<z;
 
+Fantastic f;
+Jocuri jocuri;
+jocuri.addJoc();
 return 0;
 }
 
