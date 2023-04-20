@@ -4,6 +4,8 @@
 #include<vector>
 #include<cstdlib>
 #include <ctime>
+#include <chrono>
+#include <thread>
 using namespace std;
 
 class IOinterface{
@@ -75,15 +77,17 @@ friend istream& operator >>(istream& in, Creatura& c){
 //op<<
 friend ostream& operator <<(ostream& out, const Creatura& c)
     {return c.afisare(out);}
+
+  ~Creatura(){}
     };
 
 //constructor cu toti parametrii:
 Creatura::Creatura(string nume, int varsta, float sanatate, float fericire, float hrana){
-    this->nume = "Anonim";
-    this->varsta = 10;
-    this->sanatate = 70;
-    this->fericire = 70;
-    this->hrana = 30;}
+    this->nume = nume;
+    this->varsta = varsta;
+    this->sanatate = sanatate;
+    this->fericire = fericire;
+    this->hrana = hrana;}
 //constructor nume varsta
 Creatura::Creatura()
     {this->nume = "Anonim";
@@ -165,6 +169,8 @@ virtual float staredeBine() const{
     procent = fericire + sanatate + abs(100-hrana);
     procent = procent/3;
     return procent; }
+
+
 };
 
 
@@ -212,6 +218,7 @@ virtual float staredeBine() const{
     procent = fericire + sanatate + abs(100-hrana);
     procent = procent/3;
     return procent; }
+
 
 };
 
@@ -279,10 +286,48 @@ public:
 
 //----------------
 
+class JucarieMancare{
+private:
+
+    float happy;
+    float health;
+    float hunger;
+
+public:
+
+    float getHappy(){return this->happy;}
+    float getHealth(){return this->health;}
+    float getHunger(){return this->health;}
+
+    //constructor:
+    JucarieMancare( float happy, float health, float hunger){
+        this->happy = happy;
+        this->health = health;
+        this->hunger = hunger;}
+
+    };
+
+
+
+
 class JocNou{
 private:
     Creatura* creatura;
 public:
+//copyconstructor
+Jocnou(const JocNou &obj){
+    this->creatura = obj.creatura;}
+
+//op==
+JocNou& operator=(const JocNou& obj) {
+        if (this != &obj) {
+        this->creatura = obj.creatura;
+
+        }
+        return *this;
+    }
+
+
     friend istream& operator>>(istream& in , JocNou& obj){
         cout<< "\n1. Dragon\n";
         cout<< "2. Zana\n";
@@ -294,10 +339,14 @@ public:
         return in;
         }
     friend ostream& operator<<(ostream& out, const JocNou& obj){
-        out<<"\nCreatura: \n"<< *obj.creatura<<endl;}
+        out<<"\nCreatura: \n"<< *obj.creatura<<endl;
+        return out;}
 
+
+
+    void setCreatura(Creatura* creatura){this-> creatura = creatura;}
     Creatura* getCreatura(){return this->creatura;}
-
+virtual ~JocNou() {delete creatura;}
 };
 
 
@@ -306,30 +355,26 @@ class Jocuri{
 vector<Creatura*> listaJocuri;
 
 public:
-    void addJoc();
-    void afisareJocuri();
-    void stergereJoc(int k);
+    vector<Creatura*> getListaJocuri() {
+        return listaJocuri;}
 
-};
 
-void Jocuri::addJoc(){
-    JocNou jocNou;
+    void addJoc(JocNou jocNou){
     cin >> jocNou;
     listaJocuri.push_back(jocNou.getCreatura());
     }
+    void afisareJocuri(){
+        if(listaJocuri.empty()) {
+            cout << "Nu exista jocuri in lista.\n";
+            return;
+        }
+        cout << "Jocuri disponibile: \n";
+        for(int i = 0; i < listaJocuri.size(); i++) {
+            cout << i+1 << ". " << *listaJocuri[i] << endl;
+        }
+        }
 
-void Jocuri::afisareJocuri() {
-    if(listaJocuri.empty()) {
-        cout << "Nu exista jocuri in lista.\n";
-        return;
-    }
-    cout << "Jocuri disponibile: \n";
-    for(int i = 0; i < listaJocuri.size(); i++) {
-        cout << i+1 << ". " << *listaJocuri[i] << endl;
-    }
-}
-
-void Jocuri::stergereJoc(int k) {
+    void stergereJoc(int k) {
     if(k < 1 || k > listaJocuri.size()) {
         cout << "Index invalid. Selectati un index valid.\n";
         return;
@@ -340,8 +385,9 @@ void Jocuri::stergereJoc(int k) {
 }
 
 
+};
 
-
+//-----------------------------------------
 
 
 
@@ -388,7 +434,7 @@ Center("Atentie! Cu cat nivelul de hrana este mai mare, animalutul este mai flam
 
 void welcome(string jucator){
 Antet();
-cout<<"                                                       Bine te-am gasit, "<<jucator<<"!";}
+cout<<"                                                             Bine te-am gasit, "<<jucator<<"!";}
 
 void Animal(){
 CenterSteluta("Alege-ti Personajul!",28);}
@@ -433,15 +479,135 @@ void Exit(){
     Center("Te mai asteptam pe la noi!",45);
     cout<<endl<<endl<<endl<<endl;}
 
-
 int main(){
 
+JucarieMancare Sport(2,10,10);
+JucarieMancare Minge(5,7,5);
+JucarieMancare BaghetaMagica(10,2,3);
 
+JucarieMancare Salata(0,7,-5);
+JucarieMancare Hamburger(7,-6,-10);
+JucarieMancare CartofiPrajiti(5,-4,-6);
+JucarieMancare Friptura(4,1.5,-10);
+JucarieMancare Gogoasa(10,-4,-2);
 
-Fantastic f;
 Jocuri jocuri;
-jocuri.addJoc();
-return 0;
+
+
+string jucator;
+int alegere;
+//opening page
+PrimaPagina();
+cout<<endl<<endl<<endl<<endl;
+cout<<"Pentru a incepe, va rugam introduceti-va numele:   \n";
+cin>>jucator;
+
+
+system("cls");
+welcome(jucator);
+
+
+
+cout<<" \n\n\nAlegeti dificultatea jocului:  \n     1.Usor\n     2.Normal\n     3.Greu\n     4.Parasiti jocul\n";
+int dificultate;
+cin>>dificultate;
+
+switch(dificultate){
+        case 1:   //usor
+            {system("cls");
+            Antet();
+            cout<<endl<<endl;
+            Animal();
+            cout<<endl<<endl;
+            DragonDesen();
+            cout<<endl<<endl;
+            system("pause");
+            ///                  SAU ZANA
+            system("cls");
+            welcome(jucator);
+            cout<<endl<<endl;
+            Animal();
+            cout<<endl<<endl;
+            ZanaDesen();
+int ok = 1;
+            system("pause");
+            system("cls");
+do{
+            cout<<endl;
+            welcome(jucator);
+            cout<<endl;
+            Animal();
+            cout<<endl<<endl<<endl;
+
+if(jocuri.getListaJocuri().empty()){
+            JocNou jocnou;
+            jocuri.addJoc(jocnou);
+            cout<<"\n\n AICI E JOCU:   "<<jocnou;}
+else{
+    cout<<"\nDoriti inceperea unui joc nou sau continuarea unuia trecut? 1- joc nou , 2 - alegerea altui joc, 0 - pentru a parasi jocul: ";
+        int alegerejoc;
+        do{
+        cin>>alegerejoc;
+
+            switch(alegerejoc){
+                case 1: //joc nou:
+                    {JocNou jocnou;
+                    jocuri.addJoc(jocnou);
+                    cout<<"\n\n AICI E JOCU:   "<<jocnou;
+                    break;}
+
+                case 2: // alegerea unui joc vechi:
+                    {jocuri.afisareJocuri();
+                    if (jocuri.getListaJocuri().empty()){
+                        JocNou jocnou;
+                        jocuri.addJoc(jocnou);
+                        cout<<"\n\n AICI E JOCU:   "<<jocnou;}
+                    else{
+                    cout<<"\nSelectati numarul jocului dorit : ";
+                    int x;
+                    cin>>x;
+                Creatura* animalx = jocuri.getListaJocuri()[x];
+                JocNou jocnou;
+                jocnou.setCreatura(animalx);
+                cout<<"\n\n AICI E JOCU:   "<<jocnou;
+                    }
+
+                    break;}
+                default: {Exit();}
+            }
+
+cout<<"a iesit din switchul alegerejoc , astepta continuarea";
+       ///NU uita de alegere joc ==0
+} while( alegerejoc != 0);
+
 }
+
+
+       ///NU UITA SA FACI OK=0
+
+           break;
+           }while(ok == 1);
+           }
+
+                case 2:   //normal
+                     {
+                    break;}
+
+
+                case 3:    //greu
+                    {
+                    break;}
+
+        default: Exit();}
+
+
+
+
+
+
+
+return 0;}
+
+
 
 
