@@ -6,6 +6,7 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
+#include <bits/stdc++.h>
 using namespace std;
 
 class IOinterface{
@@ -166,7 +167,7 @@ virtual ostream& afisare(ostream& out) const{
 
 virtual float staredeBine() const{
     float procent = 0.0;
-    procent = fericire + sanatate + abs(100-hrana);
+    procent = fericire + sanatate + fabs(100-hrana);
     procent = procent/3;
     return procent; }
 
@@ -215,7 +216,7 @@ virtual ostream& afisare(ostream& out) const{
 
 virtual float staredeBine() const{
     float procent = 0.0;
-    procent = fericire + sanatate + abs(100-hrana);
+    procent = fericire + sanatate + fabs(100-hrana);
     procent = procent/3;
     return procent; }
 
@@ -314,12 +315,14 @@ class JocNou{
 private:
     Creatura* creatura;
 public:
+//constructor default
+JocNou(){this->creatura= creatura;}
 //copyconstructor
-Jocnou(const JocNou &obj){
+JocNou(const JocNou &obj){
     this->creatura = obj.creatura;}
 
-//op==
-JocNou& operator=(const JocNou& obj) {
+//op=
+JocNou& operator=(const JocNou &obj) {
         if (this != &obj) {
         this->creatura = obj.creatura;
 
@@ -328,7 +331,7 @@ JocNou& operator=(const JocNou& obj) {
     }
 
 
-    friend istream& operator>>(istream& in , JocNou& obj){
+friend istream& operator>>(istream& in , JocNou& obj){
         cout<< "\n1. Dragon\n";
         cout<< "2. Zana\n";
         int k;
@@ -338,15 +341,15 @@ JocNou& operator=(const JocNou& obj) {
         in>> *obj.creatura;
         return in;
         }
-    friend ostream& operator<<(ostream& out, const JocNou& obj){
+friend ostream& operator<<(ostream& out, const JocNou& obj){
         out<<"\nCreatura: \n"<< *obj.creatura<<endl;
         return out;}
 
+void setCreatura(Creatura* creatura){this-> creatura = creatura;}
 
+Creatura* getCreatura(){return this->creatura;}
 
-    void setCreatura(Creatura* creatura){this-> creatura = creatura;}
-    Creatura* getCreatura(){return this->creatura;}
-virtual ~JocNou() {delete creatura;}
+ virtual ~JocNou() {delete creatura;}
 };
 
 
@@ -359,10 +362,14 @@ public:
         return listaJocuri;}
 
 
-    void addJoc(JocNou jocNou){
-    cin >> jocNou;
-    listaJocuri.push_back(jocNou.getCreatura());
-    }
+void addJoc() {
+    JocNou* jocNouu = new JocNou();
+    cin >> *jocNouu;
+
+    listaJocuri.push_back(jocNouu->getCreatura());
+
+}
+
     void afisareJocuri(){
         if(listaJocuri.empty()) {
             cout << "Nu exista jocuri in lista.\n";
@@ -384,6 +391,11 @@ public:
     cout << "Jocul a fost sters cu succes.\n";
 }
 
+~Jocuri() {
+    for (int i = 0; i < listaJocuri.size(); i++) {
+        delete listaJocuri[i];
+    }
+}
 
 };
 
@@ -540,9 +552,8 @@ do{
             cout<<endl<<endl<<endl;
 
 if(jocuri.getListaJocuri().empty()){
-            JocNou jocnou;
-            jocuri.addJoc(jocnou);
-            cout<<"\n\n AICI E JOCU:   "<<jocnou;}
+            jocuri.addJoc();
+            }
 else{
     cout<<"\nDoriti inceperea unui joc nou sau continuarea unuia trecut? 1- joc nou , 2 - alegerea altui joc, 0 - pentru a parasi jocul: ";
         int alegerejoc;
@@ -551,26 +562,29 @@ else{
 
             switch(alegerejoc){
                 case 1: //joc nou:
-                    {JocNou jocnou;
-                    jocuri.addJoc(jocnou);
-                    cout<<"\n\n AICI E JOCU:   "<<jocnou;
+                    {
+                    jocuri.addJoc();
+
                     break;}
 
                 case 2: // alegerea unui joc vechi:
                     {jocuri.afisareJocuri();
                     if (jocuri.getListaJocuri().empty()){
-                        JocNou jocnou;
-                        jocuri.addJoc(jocnou);
-                        cout<<"\n\n AICI E JOCU:   "<<jocnou;}
+                        jocuri.addJoc();
+                        cout<<"\n\n AICI E JOCU:   "<<*jocuri.getListaJocuri()[0];}
+
                     else{
-                    cout<<"\nSelectati numarul jocului dorit : ";
-                    int x;
-                    cin>>x;
-                Creatura* animalx = jocuri.getListaJocuri()[x];
-                JocNou jocnou;
-                jocnou.setCreatura(animalx);
-                cout<<"\n\n AICI E JOCU:   "<<jocnou;
-                    }
+                        cout << "\nSelectati numarul jocului dorit: ";
+                        int x;
+                        cin >> x;
+                        while (x < 1 || x > jocuri.getListaJocuri().size()) {
+                            cout << "Index invalid. Selectati un index valid.\n";
+                            cin>>x;}
+
+                        Creatura* animalx = jocuri.getListaJocuri()[x-1];
+                        JocNou jocnou;
+                        jocnou.setCreatura(animalx);
+                       }
 
                     break;}
                 default: {Exit();}
@@ -587,8 +601,8 @@ cout<<"a iesit din switchul alegerejoc , astepta continuarea";
 
            break;
            }while(ok == 1);
-           }
 
+            }
                 case 2:   //normal
                      {
                     break;}
@@ -598,7 +612,7 @@ cout<<"a iesit din switchul alegerejoc , astepta continuarea";
                     {
                     break;}
 
-        default: Exit();}
+                default: Exit();}
 
 
 
